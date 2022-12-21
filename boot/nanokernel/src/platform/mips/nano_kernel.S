@@ -2129,21 +2129,9 @@ l2_retry:       clld        $a0, $c8
 
 1:  bltz        $t0, revoke_shootdown_continue
 
-    dmtc0       $t0, MIPS_CP0_REG_INDEX
-    tlbr
-    dmfc0       $t1, MIPS_CP0_REG_ENTRYHI   # asid will make the address somewhere in the page, which is fine for the inequality
-
-    # clear entry if a2= < t1 < a3 ( t1 < a3 && !(t1 < a2))
-    sltu        $t2, $t1, $a3
-    sltu        $t3, $t1, $t2
-    LOG_AND_NOT $t2, $t2, $t3                # t2 = 1 if need clear
-    beqz        $t2, 1b
-    daddiu      $t0, -1
-
-    dmtc0       $zero, MIPS_CP0_REG_ENTRYLO0
-    dmtc0       $zero, MIPS_CP0_REG_ENTRYLO1
-    bgez        $t0, 1b
-    tlbwi
+    dli         $t1, 0
+    dli         $t2, 0
+    invalidate_tlb $t1, $t2
 
 #renable
     mtc0        $t9, MIPS_CP0_REG_STATUS
